@@ -29,6 +29,8 @@ The mechanism must be able to execute user tasks. This can be done in two ways:
 
 Previously created CRON tasks will be safe. You will still be able to edit them from the console and they will not be visible to users. Tasks inserted from the database level are specially marked in CRON.
 
+**Update the `crtl` table. It contains the cron user password.**
+
 ## General information
 
 The "cron" schema contains functions for managing the cron mechanism, which is responsible for running user-defined functions at specific times and their cyclicity. The schema also contains a log of completed tasks and one dictionary table for the values ​​returned by the cronalter() function.
