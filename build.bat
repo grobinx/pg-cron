@@ -1,0 +1,1 @@
+pg_dump.exe --file "dist/cron.sql" --host "raspberrypi" --port "5432" --username "postgres" --format=p --encoding "UTF8" --no-tablespaces --no-security-labels --no-toast-compression --no-table-access-method --no-unlogged-table-data --verbose --exclude-table-data="cron.log*" --schema="cron" "home"

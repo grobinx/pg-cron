@@ -1,0 +1,1771 @@
+<html>
+
+<head>
+    <link media="all" rel="stylesheet" href="cron.css" />
+</head>
+
+<body>
+    <section><span>2025-01-31 19:16:01</span>
+        <h1>Schemat "cron" - Wersja 1.1.14 - Pakiet ["core"]</h1>
+        <section id="toc">
+            <h2>Spis treści</h2>
+            <ol>
+                <li><a href="#routines" />Funkcje i procedury</a>
+                    <ol>
+                        <li><a href="#active"><code>active</code></a><span>Aktywacja zadania</span></li>
+                        <li><a href="#add"><code>add</code></a><span>Dodaje nowe zadanie do crona.</span></li>
+                        <li><a href="#_catch_exception"><code>_catch_exception</code></a></li>
+                        <li><a href="#change"><code>change</code></a><span>Zmiana polecenia</span></li>
+                        <li><a href="#clear_log"><code>clear_log</code></a><span>Czyszczenie log-a</span></li>
+                        <li><a href="#_create_cron_line"><code>_create_cron_line</code></a></li>
+                        <li><a href="#frequence"><code>frequence</code></a><span>Pozwala zmienić częstototliwość
+                                wykonywania zadania.</span></li>
+                        <li><a href="#_get_ctrl"><code>_get_ctrl</code></a></li>
+                        <li><a href="#_get_psql_opt"><code>_get_psql_opt</code></a></li>
+                        <li><a href="#_get_psql_opt"><code>_get_psql_opt</code></a></li>
+                        <li><a href="#isexists"><code>isexists</code></a></li>
+                        <li><a href="#_keylock"><code>_keylock</code></a><span>Generate global lock key</span></li>
+                        <li><a href="#_list"><code>_list</code></a></li>
+                        <li><a href="#_parse_cron_line"><code>_parse_cron_line</code></a></li>
+                        <li><a href="#pg_list"><code>pg_list</code></a></li>
+                        <li><a href="#_prepare_command"><code>_prepare_command</code></a></li>
+                        <li><a href="#_r_cron_id_seq"><code>_r_cron_id_seq</code></a><span>Get unique id</span></li>
+                        <li><a href="#remove"><code>remove</code></a><span>Usuwa zadanie z CRON-a</span></li>
+                        <li><a href="#_run"><code>_run</code></a><span>Run console command</span></li>
+                        <li><a href="#run"><code>run</code></a><span>Pozwala natychmiast wykonać polecenie z
+                                zadania</span></li>
+                        <li><a href="#run"><code>run</code></a><span>Dodaje nowe zadanie do crona. Wykonane zostanie
+                                natychmiast i zostanie usunięte z lity</span></li>
+                        <li><a href="#_start"><code>_start</code></a></li>
+                        <li><a href="#_stop"><code>_stop</code></a></li>
+                        <li><a href="#_sys_crontab"><code>_sys_crontab</code></a><span>Set crontab content</span></li>
+                        <li><a href="#_sys_crontab_l"><code>_sys_crontab_l</code></a><span>Get crontab content</span>
+                        </li>
+                        <li><a href="#version"><code>version</code></a><span>Funkcja zwraca wersję pakietu.</span></li>
+                        <li><a href="#_w_cron_id_seq"><code>_w_cron_id_seq</code></a><span>Set unique id</span></li>
+                    </ol>
+                </li>
+                <li><a href="#tables" />Tabele</a>
+                    <ol>
+                        <li><a href="#ctrl"><code>ctrl</code></a><span>Parametry konfiguracji</span></li>
+                        <li><a href="#log"><code>log</code></a><span>Tabela z logiem</span></li>
+                    </ol>
+                </li>
+                <li><a href="#views" />Widoki</a>
+                    <ol>
+                        <li><a href="#_crontab_l"><code>_crontab_l</code></a><span>cron native line with id if
+                                exists</span></li>
+                        <li><a href="#pg_list"><code>pg_list</code></a><span>Lista aktualnych zadań</span></li>
+                    </ol>
+                </li>
+            </ol>
+        </section>
+        <section id="schema">
+            <h2>Schemat</h2><a name="cron"></a>
+            <section>
+                <h3>Informacje ogólne</h3>
+                <p>Na schemacie „cron” znajdują się funkcje do zarządzani mechanizmem cron, który jest odpowiedzialny za
+                    uruchamianie ustalonych przez użytkownika funkcji w określonym czasie oraz ich cykliczność. Schemat
+                    dodatkowo zawiera log zadań wykonanych oraz jedną tablicę słownikową dla zwracanych wartości przez
+                    funkcję cronalter().</p>
+                <p>Cron jest uniksowym demonem zajmującym się cyklicznym wywoływaniem innych programów. Na potrzeby
+                    PostgreSQL został wykorzystany do wywoływania komend SQL oraz do wywołań pojedynczych, nie
+                    okresowych oraz wywołań niestandardowych nie obsługiwanych przez sam mechanizm (kwartał, trzecia
+                    sobota miesiąca, etc.).</p>
+                <div class="alert">
+                    <h4>UWAGA</h4>
+                    <p>W przypadku dodawania zadań do CRON-a w bazach danych spiętych w cluster (np. PgPool) należy
+                        łączyć się zawsze do bazy danych, która jest masterem – nie przez PgPool.</p>
+                </div>
+                Definicja zadania w crontab:
+                <code><pre># Example of job definition:
+# .---------------- minute (0 - 59)
+# |  .------------- hour (0 - 23)
+# |  |  .---------- day of month (1 - 31)
+# |  |  |  .------- month (1 - 12) or jan,feb,mar,apr ...
+# |  |  |  |  .---- day of week (0 - 6) (Sunday=0 or 7) 
+# |  |  |  |  |            or sun,mon,tue,wed,thu,fri,sat
+# |  |  |  |  |
+# *  *  *  *  * user-name command to be executed</pre></code>
+                <p>Gwiazdka (*) oznacza wykonanie wszystkich wartości, np. „*” w kolumnie month oznacza, że zadanie
+                    będzie wykonywane każdego miesiąca.</p>
+                <p>Parametry można oddzielać przecinkami, np. 1,3,6,16. Jeżeli w ten sposób zapiszemy parametr hour,
+                    zadania wykona się o godzinach 01:00 w nocy, 03:00, 06:00 oraz o 16:00.</p>
+                <p>Parametry liczbowe mogą również przyjmować przedziały zapisane jako przedział (z kreską) jak np. 1-5,
+                    co również oznacza taki sam zapis jak 1,2,3,4,5.</p>
+                <p>Istnieje również możliwość określenie zakresu co definiuje się przez znak ukośnika (/) np. 1-15/2
+                    będzie oznaczało to samo co 1,3,5,7,9,11,13,15.</p>
+            </section>
+            <section>
+                <h3>Sekwencja identyfikatora</h3>
+                <p>Na schemacie CRON znajduje się sekwencja job_seq z której pobierany jest kolejny identyfikator
+                    zadania wstawianego do cron-a. Sekwencja ta sprawdza się w przypadku gdy na jednym serwerze znajduje
+                    się wyłącznie jedna baza danych z implementacją mechanizmu CRON.</p>
+                <p>W przypadku gdy baz danych jest więcej należy skorzystać z globalnej numeracji, która jest
+                    zaimplementowana w mechanizmie CRON dla PostgreSQL. W celu uruchomienia mechanizmu należy w katalogu
+                    domowym PostgreSQL ./N.X/data utworzyć plik cron_id.seq i zapisać w nim pierwszą wartość sekwencji,
+                    np. 1. Od tego momentu wszystkie identyfikatory zadań we wszystkich bazach danych będą nadawane z
+                    globalnej sekwencji.</p>
+                Jeśli posiadamy prawa administratora można również wywołać poniższe polecenie:
+                <code><pre>do $$
+begin
+  perform cron._w_cron_id_seq('NNN');
+end; $$</pre></code>
+                <p>Polecenie to spowoduje zapis wartości NNN do odpowiedniego pliku. NNN to ostatnia wartość sekwencji
+                    ze wszystkich maz danych.</p>
+            </section>
+            <dl></dl>
+        </section>
+        <section id="routines">
+            <h2>Funkcje i procedury</h2>
+            <section><a name="active"></a>
+                <h3>active <small>(function)</small></h3><code>active(ajobid, aactive) <span>→ integer</code>
+                <p>Pozwala aktywować wybrane zadanie.</p>
+                <h4>Argumenty</h4>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Lp</th>
+                            <th>Nazwa</th>
+                            <th>Typ danych</th>
+                            <th>Wartość domyślna</th>
+                            <th>Tryb</th>
+                            <th>Opis</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>1</td>
+                            <td>ajobid</td>
+                            <td>integer</td>
+                            <td></td>
+                            <td>in</td>
+                            <td>Identyfikator zadania</td>
+                        </tr>
+                        <tr>
+                            <td>2</td>
+                            <td>aactive</td>
+                            <td>character varying</td>
+                            <td></td>
+                            <td>in</td>
+                            <td>Nowa wartość dla parametru active (Y/N)</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <dl>
+                    <dt>Autor</dt>
+                    <dd>
+                        <ul>
+                            <li>Andrzej Kałuża</li>
+                        </ul>
+                    </dd>
+                    <dt>Pakiet</dt>
+                    <dd>core</dd>
+                    <dt>Publiczne</dt>
+                    <dd>true</dd>
+                </dl>
+                <h4>Podsumowanie</h4>
+                <p>Aktywacja zadania</p>
+                <h4>Zwraca</h4>
+                <dl>
+                    <dt>Typ danych</dt>
+                    <dd><code>integer</code></dd>
+                </dl>
+            </section>
+            <section><a name="add"></a>
+                <h3>add <small>(function)</small></h3>
+                <code>add(acommand, aminute, ahour<sup>opc</sup>, adayofmonth<sup>opc</sup>, amonth<sup>opc</sup>, adayofweek<sup>opc</sup>, ajobid<sup>opc</sup>, aactive<sup>opc</sup>, aautoremove<sup>opc</sup>, arole<sup>opc</sup>) <span>→ integer</code>
+                <p>Dodaje nowe zadanie do crona.</p>
+                <h4>Argumenty</h4>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Lp</th>
+                            <th>Nazwa</th>
+                            <th>Typ danych</th>
+                            <th>Wartość domyślna</th>
+                            <th>Tryb</th>
+                            <th>Opis</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>1</td>
+                            <td>acommand</td>
+                            <td>character varying</td>
+                            <td></td>
+                            <td>in</td>
+                            <td>Komenda SQL która zostanie wykonana</td>
+                        </tr>
+                        <tr>
+                            <td>2</td>
+                            <td>aminute</td>
+                            <td>character varying</td>
+                            <td></td>
+                            <td>in</td>
+                            <td>Minuta wykonania (0-59)</td>
+                        </tr>
+                        <tr>
+                            <td>3</td>
+                            <td>ahour</td>
+                            <td>character varying</td>
+                            <td>NULL::character varying</td>
+                            <td>in</td>
+                            <td>Godzina wykonania (0-23)</td>
+                        </tr>
+                        <tr>
+                            <td>4</td>
+                            <td>adayofmonth</td>
+                            <td>character varying</td>
+                            <td>NULL::character varying</td>
+                            <td>in</td>
+                            <td>Dzień miesiąca wykonania (1-31)</td>
+                        </tr>
+                        <tr>
+                            <td>5</td>
+                            <td>amonth</td>
+                            <td>character varying</td>
+                            <td>NULL::character varying</td>
+                            <td>in</td>
+                            <td>Miesiąc wykonania (1-12) lub (JAN, FEB, MAR, etc.)</td>
+                        </tr>
+                        <tr>
+                            <td>6</td>
+                            <td>adayofweek</td>
+                            <td>character varying</td>
+                            <td>NULL::character varying</td>
+                            <td>in</td>
+                            <td>Dzień tygodnia wykonania (0-6) lub (MON, TUE, WED, etc.)</td>
+                        </tr>
+                        <tr>
+                            <td>7</td>
+                            <td>ajobid</td>
+                            <td>integer</td>
+                            <td>NULL::integer</td>
+                            <td>in</td>
+                            <td>(NULL) Identyfikator zadania, jeśli nowe to null</td>
+                        </tr>
+                        <tr>
+                            <td>8</td>
+                            <td>aactive</td>
+                            <td>character varying</td>
+                            <td>NULL::character varying</td>
+                            <td>in</td>
+                            <td>(NULL) Przyjmuje wartość „Y” lub „N”. Zadanie dodane jako broken nie zostanie wykonane.
+                                Do CRON’a zostanie dodano jako zakomentowane</td>
+                        </tr>
+                        <tr>
+                            <td>9</td>
+                            <td>aautoremove</td>
+                            <td>boolean</td>
+                            <td>false</td>
+                            <td>in</td>
+                            <td>(FALSE) Czy zadanie jednorazowe – ma być usunięte po wykonaniu</td>
+                        </tr>
+                        <tr>
+                            <td>10</td>
+                            <td>arole</td>
+                            <td>character varying</td>
+                            <td>NULL::character varying</td>
+                            <td>in</td>
+                            <td>(od 1.0.3) (NULL) Rola w ramach której zadanie ma zostać uruchomione</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <dl>
+                    <dt>Autor</dt>
+                    <dd>
+                        <ul>
+                            <li>Andrzej Kałuża</li>
+                        </ul>
+                    </dd>
+                    <dt>Wersja</dt>
+                    <dd>1.0.3</dd>
+                    <dt>Dostępna od</dt>
+                    <dd>1.0</dd>
+                    <dt>Pakiet</dt>
+                    <dd>core</dd>
+                    <dt>Publiczne</dt>
+                    <dd>true</dd>
+                </dl>
+                <h4>Do zrobienia</h4>
+                <p>zmienić active varchar na boolean
+
+                </p>
+                <h4>Przykład</h4><code><pre>-- Dodanie zadania do crona. Zadanie będzie się wykonywać co miesiąc 6 dnia miesiąca o godzinie 15:30.
+select cron.add('perform public.test_function(''some_param'')', '30', '15', '6');</pre></code>
+                <h4>Zwraca</h4>
+                <p>jobid</p>
+                <dl>
+                    <dt>Typ danych</dt>
+                    <dd><code>integer</code></dd>
+                </dl>
+            </section>
+            <section><a name="_catch_exception"></a>
+                <h3>_catch_exception <small>(function)</small></h3>
+                <code>_catch_exception(aerrm, ailog) <span>→ void</code>
+                <h4>Argumenty</h4>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Lp</th>
+                            <th>Nazwa</th>
+                            <th>Typ danych</th>
+                            <th>Wartość domyślna</th>
+                            <th>Tryb</th>
+                            <th>Opis</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>1</td>
+                            <td>aerrm</td>
+                            <td>text</td>
+                            <td></td>
+                            <td>in</td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td>2</td>
+                            <td>ailog</td>
+                            <td>bigint</td>
+                            <td></td>
+                            <td>in</td>
+                            <td></td>
+                        </tr>
+                    </tbody>
+                </table>
+                <dl>
+                    <dt>Autor</dt>
+                    <dd>
+                        <ul>
+                            <li>Andrzej Kałuża</li>
+                        </ul>
+                    </dd>
+                    <dt>Pakiet</dt>
+                    <dd>core</dd>
+                    <dt>Prywatne</dt>
+                    <dd>true</dd>
+                </dl>
+            </section>
+            <section><a name="change"></a>
+                <h3>change <small>(function)</small></h3><code>change(ajobid, acommand) <span>→ integer</code>
+                <p>Pozwala zmienić polecenie SQL w istniejącym zadaniu.</p>
+                <h4>Argumenty</h4>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Lp</th>
+                            <th>Nazwa</th>
+                            <th>Typ danych</th>
+                            <th>Wartość domyślna</th>
+                            <th>Tryb</th>
+                            <th>Opis</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>1</td>
+                            <td>ajobid</td>
+                            <td>integer</td>
+                            <td></td>
+                            <td>in</td>
+                            <td>Identyfikator zadania</td>
+                        </tr>
+                        <tr>
+                            <td>2</td>
+                            <td>acommand</td>
+                            <td>text</td>
+                            <td></td>
+                            <td>in</td>
+                            <td>Nowe polecenie SQL</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <dl>
+                    <dt>Autor</dt>
+                    <dd>
+                        <ul>
+                            <li>Andrzej Kałuża</li>
+                        </ul>
+                    </dd>
+                    <dt>Pakiet</dt>
+                    <dd>core</dd>
+                    <dt>Publiczne</dt>
+                    <dd>true</dd>
+                </dl>
+                <h4>Podsumowanie</h4>
+                <p>Zmiana polecenia</p>
+                <h4>Zwraca</h4>
+                <dl>
+                    <dt>Typ danych</dt>
+                    <dd><code>integer</code></dd>
+                </dl>
+            </section>
+            <section><a name="clear_log"></a>
+                <h3>clear_log <small>(function)</small></h3><code>clear_log() <span>→ void</code>
+                <p>Pozwala wyczyścić log zgodnie z opcją log.interval (domyślnie 1 miesiąc).
+                    <br />
+                    <br />Można dodać wywołanie tej funkcji jako codzienne zadanie CRON by log-i nie przyrastały
+                    zbytnio.
+                </p>
+                <dl>
+                    <dt>Autor</dt>
+                    <dd>
+                        <ul>
+                            <li>Andrzej Kałuża</li>
+                        </ul>
+                    </dd>
+                    <dt>Pakiet</dt>
+                    <dd>core</dd>
+                    <dt>Publiczne</dt>
+                    <dd>true</dd>
+                </dl>
+                <h4>Przykład</h4><code><pre>-- Poniższy przykład demonstruje jak dodać zadanie z czyszczeniem log-a. Zadanie to będzie wykonywane codziennie o godzinie 0:15.
+do $$
+begin
+  perform add('perform clear_log()', '15', '0');
+end;</pre></code>
+                <h4>Podsumowanie</h4>
+                <p>Czyszczenie log-a</p>
+            </section>
+            <section><a name="_create_cron_line"></a>
+                <h3>_create_cron_line <small>(function)</small></h3>
+                <code>_create_cron_line(apgjobid, aactive, aminute, ahour, adayofmonth, amonth, adayofweek, acommand) <span>→ text</code>
+                <h4>Argumenty</h4>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Lp</th>
+                            <th>Nazwa</th>
+                            <th>Typ danych</th>
+                            <th>Wartość domyślna</th>
+                            <th>Tryb</th>
+                            <th>Opis</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>1</td>
+                            <td>apgjobid</td>
+                            <td>bigint</td>
+                            <td></td>
+                            <td>in</td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td>2</td>
+                            <td>aactive</td>
+                            <td>character varying</td>
+                            <td></td>
+                            <td>in</td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td>3</td>
+                            <td>aminute</td>
+                            <td>character varying</td>
+                            <td></td>
+                            <td>in</td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td>4</td>
+                            <td>ahour</td>
+                            <td>character varying</td>
+                            <td></td>
+                            <td>in</td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td>5</td>
+                            <td>adayofmonth</td>
+                            <td>character varying</td>
+                            <td></td>
+                            <td>in</td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td>6</td>
+                            <td>amonth</td>
+                            <td>character varying</td>
+                            <td></td>
+                            <td>in</td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td>7</td>
+                            <td>adayofweek</td>
+                            <td>character varying</td>
+                            <td></td>
+                            <td>in</td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td>8</td>
+                            <td>acommand</td>
+                            <td>text</td>
+                            <td></td>
+                            <td>in</td>
+                            <td></td>
+                        </tr>
+                    </tbody>
+                </table>
+                <dl>
+                    <dt>Autor</dt>
+                    <dd>
+                        <ul>
+                            <li>Andrzej Kałuża</li>
+                        </ul>
+                    </dd>
+                    <dt>Pakiet</dt>
+                    <dd>core</dd>
+                    <dt>Prywatne</dt>
+                    <dd>true</dd>
+                </dl>
+                <h4>Zwraca</h4>
+                <dl>
+                    <dt>Typ danych</dt>
+                    <dd><code>text</code></dd>
+                </dl>
+            </section>
+            <section><a name="frequence"></a>
+                <h3>frequence <small>(function)</small></h3>
+                <code>frequence(ajobid, aminute, ahour<sup>opc</sup>, adayofmonth<sup>opc</sup>, amonth<sup>opc</sup>, adayofweek<sup>opc</sup>) <span>→ integer</code>
+                <p>Pozwala zmienić częstototliwość wykonywania zadania.</p>
+                <h4>Argumenty</h4>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Lp</th>
+                            <th>Nazwa</th>
+                            <th>Typ danych</th>
+                            <th>Wartość domyślna</th>
+                            <th>Tryb</th>
+                            <th>Opis</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>1</td>
+                            <td>ajobid</td>
+                            <td>integer</td>
+                            <td></td>
+                            <td>in</td>
+                            <td>Identyfikator zadania</td>
+                        </tr>
+                        <tr>
+                            <td>2</td>
+                            <td>aminute</td>
+                            <td>character varying</td>
+                            <td></td>
+                            <td>in</td>
+                            <td>Minuta wykonania (0-59)</td>
+                        </tr>
+                        <tr>
+                            <td>3</td>
+                            <td>ahour</td>
+                            <td>character varying</td>
+                            <td>NULL::character varying</td>
+                            <td>in</td>
+                            <td>Godzina wykonania (0-23)</td>
+                        </tr>
+                        <tr>
+                            <td>4</td>
+                            <td>adayofmonth</td>
+                            <td>character varying</td>
+                            <td>NULL::character varying</td>
+                            <td>in</td>
+                            <td>Dzień miesiąca wykonania (1-31)</td>
+                        </tr>
+                        <tr>
+                            <td>5</td>
+                            <td>amonth</td>
+                            <td>character varying</td>
+                            <td>NULL::character varying</td>
+                            <td>in</td>
+                            <td>Miesiąc wykonania (1-12) lub (JAN, FEB, MAR, etc.)</td>
+                        </tr>
+                        <tr>
+                            <td>6</td>
+                            <td>adayofweek</td>
+                            <td>character varying</td>
+                            <td>NULL::character varying</td>
+                            <td>in</td>
+                            <td>Dzień tygodnia wykonania (0-6) lub (MON, TUE, WED, etc.)</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <dl>
+                    <dt>Autor</dt>
+                    <dd>
+                        <ul>
+                            <li>Andrzej Kałuża</li>
+                        </ul>
+                    </dd>
+                    <dt>Pakiet</dt>
+                    <dd>core</dd>
+                    <dt>Publiczne</dt>
+                    <dd>true</dd>
+                </dl>
+                <h4>Zwraca</h4>
+                <dl>
+                    <dt>Typ danych</dt>
+                    <dd><code>integer</code></dd>
+                </dl>
+            </section>
+            <section><a name="_get_ctrl"></a>
+                <h3>_get_ctrl <small>(function)</small></h3>
+                <code>_get_ctrl(aname, adefaultvalue<sup>opc</sup>) <span>→ text</code>
+                <h4>Argumenty</h4>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Lp</th>
+                            <th>Nazwa</th>
+                            <th>Typ danych</th>
+                            <th>Wartość domyślna</th>
+                            <th>Tryb</th>
+                            <th>Opis</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>1</td>
+                            <td>aname</td>
+                            <td>name</td>
+                            <td></td>
+                            <td>in</td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td>2</td>
+                            <td>adefaultvalue</td>
+                            <td>text</td>
+                            <td>NULL::text</td>
+                            <td>in</td>
+                            <td></td>
+                        </tr>
+                    </tbody>
+                </table>
+                <dl>
+                    <dt>Autor</dt>
+                    <dd>
+                        <ul>
+                            <li>Andrzej Kałuża</li>
+                        </ul>
+                    </dd>
+                    <dt>Pakiet</dt>
+                    <dd>core</dd>
+                    <dt>Prywatne</dt>
+                    <dd>true</dd>
+                </dl>
+                <h4>Zwraca</h4>
+                <dl>
+                    <dt>Typ danych</dt>
+                    <dd><code>text</code></dd>
+                </dl>
+            </section>
+            <section><a name="_get_psql_opt"></a>
+                <h3>_get_psql_opt <small>(function)</small></h3><code>_get_psql_opt(aopt, acommand) <span>→ text</code>
+                <h4>Argumenty</h4>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Lp</th>
+                            <th>Nazwa</th>
+                            <th>Typ danych</th>
+                            <th>Wartość domyślna</th>
+                            <th>Tryb</th>
+                            <th>Opis</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>1</td>
+                            <td>aopt</td>
+                            <td>text</td>
+                            <td></td>
+                            <td>in</td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td>2</td>
+                            <td>acommand</td>
+                            <td>text</td>
+                            <td></td>
+                            <td>in</td>
+                            <td></td>
+                        </tr>
+                    </tbody>
+                </table>
+                <dl>
+                    <dt>Autor</dt>
+                    <dd>
+                        <ul>
+                            <li>Andrzej Kałuża</li>
+                        </ul>
+                    </dd>
+                    <dt>Pakiet</dt>
+                    <dd>core</dd>
+                    <dt>Prywatne</dt>
+                    <dd>true</dd>
+                </dl>
+                <h4>Zwraca</h4>
+                <dl>
+                    <dt>Typ danych</dt>
+                    <dd><code>text</code></dd>
+                </dl>
+            </section>
+            <section><a name="_get_psql_opt"></a>
+                <h3>_get_psql_opt <small>(function)</small></h3><code>_get_psql_opt(aopt, acommand) <span>→ text</code>
+                <h4>Argumenty</h4>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Lp</th>
+                            <th>Nazwa</th>
+                            <th>Typ danych</th>
+                            <th>Wartość domyślna</th>
+                            <th>Tryb</th>
+                            <th>Opis</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>1</td>
+                            <td>aopt</td>
+                            <td>integer</td>
+                            <td></td>
+                            <td>in</td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td>2</td>
+                            <td>acommand</td>
+                            <td>text</td>
+                            <td></td>
+                            <td>in</td>
+                            <td></td>
+                        </tr>
+                    </tbody>
+                </table>
+                <dl>
+                    <dt>Autor</dt>
+                    <dd>
+                        <ul>
+                            <li>Andrzej Kałuża</li>
+                        </ul>
+                    </dd>
+                    <dt>Pakiet</dt>
+                    <dd>core</dd>
+                    <dt>Prywatne</dt>
+                    <dd>true</dd>
+                </dl>
+                <h4>Zwraca</h4>
+                <dl>
+                    <dt>Typ danych</dt>
+                    <dd><code>text</code></dd>
+                </dl>
+            </section>
+            <section><a name="isexists"></a>
+                <h3>isexists <small>(function)</small></h3><code>isexists(ajobid) <span>→ integer</code>
+                <h4>Argumenty</h4>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Lp</th>
+                            <th>Nazwa</th>
+                            <th>Typ danych</th>
+                            <th>Wartość domyślna</th>
+                            <th>Tryb</th>
+                            <th>Opis</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>1</td>
+                            <td>ajobid</td>
+                            <td>integer</td>
+                            <td></td>
+                            <td>in</td>
+                            <td></td>
+                        </tr>
+                    </tbody>
+                </table>
+                <dl></dl>
+                <h4>Zwraca</h4>
+                <dl>
+                    <dt>Typ danych</dt>
+                    <dd><code>integer</code></dd>
+                </dl>
+            </section>
+            <section><a name="_keylock"></a>
+                <h3>_keylock <small>(function)</small></h3><code>_keylock() <span>→ bigint</code>
+                <p>Generate global lock key</p>
+                <dl>
+                    <dt>Autor</dt>
+                    <dd>
+                        <ul>
+                            <li>Andrzej Kałuża</li>
+                        </ul>
+                    </dd>
+                    <dt>Dostępna od</dt>
+                    <dd>1.0.10</dd>
+                    <dt>Pakiet</dt>
+                    <dd>core</dd>
+                    <dt>Prywatne</dt>
+                    <dd>true</dd>
+                </dl>
+                <h4>Zwraca</h4>
+                <dl>
+                    <dt>Typ danych</dt>
+                    <dd><code>bigint</code></dd>
+                </dl>
+            </section>
+            <section><a name="_list"></a>
+                <h3>_list <small>(function)</small></h3><code>_list() <span>→ record</code>
+                <dl>
+                    <dt>Autor</dt>
+                    <dd>
+                        <ul>
+                            <li>Andrzej Kałuża</li>
+                        </ul>
+                    </dd>
+                    <dt>Pakiet</dt>
+                    <dd>core</dd>
+                    <dt>Prywatne</dt>
+                    <dd>true</dd>
+                </dl>
+                <h4>Zwraca</h4>
+                <dl>
+                    <dt>Typ danych</dt>
+                    <dd><code>TABLE(pgjobid bigint, active character varying, minute character varying, hour character varying, dayofmonth character varying, month character varying, dayofweek character varying, command text)</code>
+                    </dd>
+                </dl>
+            </section>
+            <section><a name="_parse_cron_line"></a>
+                <h3>_parse_cron_line <small>(function)</small></h3>
+                <code>_parse_cron_line(aline) <span>→ character varying[]</code>
+                <h4>Argumenty</h4>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Lp</th>
+                            <th>Nazwa</th>
+                            <th>Typ danych</th>
+                            <th>Wartość domyślna</th>
+                            <th>Tryb</th>
+                            <th>Opis</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>1</td>
+                            <td>aline</td>
+                            <td>text</td>
+                            <td></td>
+                            <td>in</td>
+                            <td></td>
+                        </tr>
+                    </tbody>
+                </table>
+                <dl>
+                    <dt>Autor</dt>
+                    <dd>
+                        <ul>
+                            <li>Andrzej Kałuża</li>
+                        </ul>
+                    </dd>
+                    <dt>Pakiet</dt>
+                    <dd>core</dd>
+                    <dt>Prywatne</dt>
+                    <dd>true</dd>
+                </dl>
+                <h4>Zwraca</h4>
+                <dl>
+                    <dt>Typ danych</dt>
+                    <dd><code>character varying[]</code></dd>
+                </dl>
+            </section>
+            <section><a name="pg_list"></a>
+                <h3>pg_list <small>(function)</small></h3><code>pg_list() <span>→ record</code>
+                <dl></dl>
+                <h4>Zwraca</h4>
+                <dl>
+                    <dt>Typ danych</dt>
+                    <dd><code>TABLE(jobid bigint, database character varying, role character varying, minute character varying, hour character varying, dayofmonth character varying, month character varying, dayofweek character varying, last_start timestamp without time zone, this_start timestamp without time zone, total_time bigint, failures bigint, times bigint, command text, active character varying, autoremove character varying)</code>
+                    </dd>
+                </dl>
+            </section>
+            <section><a name="_prepare_command"></a>
+                <h3>_prepare_command <small>(function)</small></h3>
+                <code>_prepare_command(ajobid, acommand, aautoremove<sup>opc</sup>, arole<sup>opc</sup>) <span>→ text</code>
+                <h4>Argumenty</h4>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Lp</th>
+                            <th>Nazwa</th>
+                            <th>Typ danych</th>
+                            <th>Wartość domyślna</th>
+                            <th>Tryb</th>
+                            <th>Opis</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>1</td>
+                            <td>ajobid</td>
+                            <td>bigint</td>
+                            <td></td>
+                            <td>in</td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td>2</td>
+                            <td>acommand</td>
+                            <td>text</td>
+                            <td></td>
+                            <td>in</td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td>3</td>
+                            <td>aautoremove</td>
+                            <td>boolean</td>
+                            <td>false</td>
+                            <td>in</td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td>4</td>
+                            <td>arole</td>
+                            <td>character varying</td>
+                            <td>NULL::character varying</td>
+                            <td>in</td>
+                            <td></td>
+                        </tr>
+                    </tbody>
+                </table>
+                <dl>
+                    <dt>Wersja</dt>
+                    <dd>1.1</dd>
+                    <dt>Dostępna od</dt>
+                    <dd>1.0.0</dd>
+                    <dt>Pakiet</dt>
+                    <dd>core</dd>
+                    <dt>Prywatne</dt>
+                    <dd>true</dd>
+                </dl>
+                <h4>Zmiany</h4>
+                <ul>
+                    <li>1.1 - dodanie podmiany $(jobid) identyfikatorem zadania</li>
+                </ul>
+                <h4>Zwraca</h4>
+                <dl>
+                    <dt>Typ danych</dt>
+                    <dd><code>text</code></dd>
+                </dl>
+            </section>
+            <section><a name="_r_cron_id_seq"></a>
+                <h3>_r_cron_id_seq <small>(function)</small></h3><code>_r_cron_id_seq() <span>→ character varying</code>
+                <p>Get unique id for all PostgreSQL instances</p>
+                <dl>
+                    <dt>Autor</dt>
+                    <dd>
+                        <ul>
+                            <li>Andrzej Kałuża</li>
+                        </ul>
+                    </dd>
+                    <dt>Pakiet</dt>
+                    <dd>core</dd>
+                    <dt>Prywatne</dt>
+                    <dd>true</dd>
+                </dl>
+                <h4>Podsumowanie</h4>
+                <p>Get unique id</p>
+                <h4>Zwraca</h4>
+                <dl>
+                    <dt>Typ danych</dt>
+                    <dd><code>character varying</code></dd>
+                </dl>
+            </section>
+            <section><a name="remove"></a>
+                <h3>remove <small>(function)</small></h3><code>remove(ajobid) <span>→ integer</code>
+                <p>Usuwa zadanie z CRON-a</p>
+                <h4>Argumenty</h4>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Lp</th>
+                            <th>Nazwa</th>
+                            <th>Typ danych</th>
+                            <th>Wartość domyślna</th>
+                            <th>Tryb</th>
+                            <th>Opis</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>1</td>
+                            <td>ajobid</td>
+                            <td>integer</td>
+                            <td></td>
+                            <td>in</td>
+                            <td>Identyfikator zadania</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <dl>
+                    <dt>Autor</dt>
+                    <dd>
+                        <ul>
+                            <li>Andrzej Kałuża</li>
+                        </ul>
+                    </dd>
+                    <dt>Pakiet</dt>
+                    <dd>core</dd>
+                    <dt>Publiczne</dt>
+                    <dd>true</dd>
+                </dl>
+                <h4>Zwraca</h4>
+                <dl>
+                    <dt>Typ danych</dt>
+                    <dd><code>integer</code></dd>
+                </dl>
+            </section>
+            <section><a name="_run"></a>
+                <h3>_run <small>(function)</small></h3><code>_run(acommand) <span>→ character varying</code>
+                <p>Function for run command on system console</p>
+                <h4>Argumenty</h4>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Lp</th>
+                            <th>Nazwa</th>
+                            <th>Typ danych</th>
+                            <th>Wartość domyślna</th>
+                            <th>Tryb</th>
+                            <th>Opis</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>1</td>
+                            <td>acommand</td>
+                            <td>text</td>
+                            <td></td>
+                            <td>in</td>
+                            <td></td>
+                        </tr>
+                    </tbody>
+                </table>
+                <dl>
+                    <dt>Autor</dt>
+                    <dd>
+                        <ul>
+                            <li>Andrzej Kałuża</li>
+                        </ul>
+                    </dd>
+                    <dt>Pakiet</dt>
+                    <dd>core</dd>
+                    <dt>Prywatne</dt>
+                    <dd>true</dd>
+                </dl>
+                <h4>Podsumowanie</h4>
+                <p>Run console command</p>
+                <h4>Zwraca</h4>
+                <dl>
+                    <dt>Typ danych</dt>
+                    <dd><code>character varying</code></dd>
+                </dl>
+            </section>
+            <section><a name="run"></a>
+                <h3>run <small>(function)</small></h3><code>run(ajobid) <span>→ text</code>
+                <p>Pozwala natychmiast wykonać polecenie z zadania</p>
+                <h4>Argumenty</h4>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Lp</th>
+                            <th>Nazwa</th>
+                            <th>Typ danych</th>
+                            <th>Wartość domyślna</th>
+                            <th>Tryb</th>
+                            <th>Opis</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>1</td>
+                            <td>ajobid</td>
+                            <td>integer</td>
+                            <td></td>
+                            <td>in</td>
+                            <td>Identyfikator zadania</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <dl>
+                    <dt>Autor</dt>
+                    <dd>
+                        <ul>
+                            <li>Andrzej Kałuża</li>
+                        </ul>
+                    </dd>
+                    <dt>Pakiet</dt>
+                    <dd>core</dd>
+                    <dt>Publiczne</dt>
+                    <dd>true</dd>
+                </dl>
+                <h4>Zwraca</h4>
+                <dl>
+                    <dt>Typ danych</dt>
+                    <dd><code>text</code></dd>
+                </dl>
+            </section>
+            <section><a name="run"></a>
+                <h3>run <small>(function)</small></h3><code>run(acommand, arole<sup>opc</sup>) <span>→ integer</code>
+                <p>Dodaje nowe zadanie do crona. Wykonane zostanie natychmiast i zostanie usunięte z lity</p>
+                <h4>Argumenty</h4>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Lp</th>
+                            <th>Nazwa</th>
+                            <th>Typ danych</th>
+                            <th>Wartość domyślna</th>
+                            <th>Tryb</th>
+                            <th>Opis</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>1</td>
+                            <td>acommand</td>
+                            <td>character varying</td>
+                            <td></td>
+                            <td>in</td>
+                            <td>Polecenie SQL która zostanie wykonana</td>
+                        </tr>
+                        <tr>
+                            <td>2</td>
+                            <td>arole</td>
+                            <td>character varying</td>
+                            <td>NULL::character varying</td>
+                            <td>in</td>
+                            <td>(NULL) Rola w ramach której zadanie ma zostać uruchomione</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <dl>
+                    <dt>Autor</dt>
+                    <dd>
+                        <ul>
+                            <li>Andrzej Kałuża</li>
+                        </ul>
+                    </dd>
+                    <dt>Wersja</dt>
+                    <dd>2.0</dd>
+                    <dt>Dostępna od</dt>
+                    <dd>1.0.8</dd>
+                    <dt>Pakiet</dt>
+                    <dd>core</dd>
+                    <dt>Publiczne</dt>
+                    <dd>true</dd>
+                </dl>
+                <h4>Zmiany</h4>
+                <ul>
+                    <li>2024-12-05 Andrzej Kałuża - teraz wykona się na pewno zawsze</li>
+                </ul>
+                <h4>Zwraca</h4>
+                <dl>
+                    <dt>Typ danych</dt>
+                    <dd><code>integer</code></dd>
+                </dl>
+            </section>
+            <section><a name="_start"></a>
+                <h3>_start <small>(function)</small></h3><code>_start(ajobid) <span>→ bigint</code>
+                <h4>Argumenty</h4>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Lp</th>
+                            <th>Nazwa</th>
+                            <th>Typ danych</th>
+                            <th>Wartość domyślna</th>
+                            <th>Tryb</th>
+                            <th>Opis</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>1</td>
+                            <td>ajobid</td>
+                            <td>bigint</td>
+                            <td></td>
+                            <td>in</td>
+                            <td></td>
+                        </tr>
+                    </tbody>
+                </table>
+                <dl>
+                    <dt>Autor</dt>
+                    <dd>
+                        <ul>
+                            <li>Andrzej Kałuża</li>
+                        </ul>
+                    </dd>
+                    <dt>Pakiet</dt>
+                    <dd>core</dd>
+                    <dt>Prywatne</dt>
+                    <dd>true</dd>
+                </dl>
+                <h4>Zwraca</h4>
+                <dl>
+                    <dt>Typ danych</dt>
+                    <dd><code>bigint</code></dd>
+                </dl>
+            </section>
+            <section><a name="_stop"></a>
+                <h3>_stop <small>(function)</small></h3><code>_stop(ailog) <span>→ void</code>
+                <h4>Argumenty</h4>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Lp</th>
+                            <th>Nazwa</th>
+                            <th>Typ danych</th>
+                            <th>Wartość domyślna</th>
+                            <th>Tryb</th>
+                            <th>Opis</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>1</td>
+                            <td>ailog</td>
+                            <td>bigint</td>
+                            <td></td>
+                            <td>in</td>
+                            <td></td>
+                        </tr>
+                    </tbody>
+                </table>
+                <dl>
+                    <dt>Autor</dt>
+                    <dd>
+                        <ul>
+                            <li>Andrzej Kałuża</li>
+                        </ul>
+                    </dd>
+                    <dt>Pakiet</dt>
+                    <dd>core</dd>
+                    <dt>Prywatne</dt>
+                    <dd>true</dd>
+                </dl>
+            </section>
+            <section><a name="_sys_crontab"></a>
+                <h3>_sys_crontab <small>(function)</small></h3><code>_sys_crontab(adata) <span>→ void</code>
+                <p>Core function to set system crontab content</p>
+                <h4>Argumenty</h4>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Lp</th>
+                            <th>Nazwa</th>
+                            <th>Typ danych</th>
+                            <th>Wartość domyślna</th>
+                            <th>Tryb</th>
+                            <th>Opis</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>1</td>
+                            <td>adata</td>
+                            <td>text</td>
+                            <td></td>
+                            <td>in</td>
+                            <td></td>
+                        </tr>
+                    </tbody>
+                </table>
+                <dl>
+                    <dt>Autor</dt>
+                    <dd>
+                        <ul>
+                            <li>Andrzej Kałuża</li>
+                        </ul>
+                    </dd>
+                    <dt>Pakiet</dt>
+                    <dd>core</dd>
+                    <dt>Prywatne</dt>
+                    <dd>true</dd>
+                </dl>
+                <h4>Podsumowanie</h4>
+                <p>Set crontab content</p>
+            </section>
+            <section><a name="_sys_crontab_l"></a>
+                <h3>_sys_crontab_l <small>(function)</small></h3><code>_sys_crontab_l() <span>→ character varying</code>
+                <p>Core function for get crontab content</p>
+                <dl>
+                    <dt>Autor</dt>
+                    <dd>
+                        <ul>
+                            <li>Andrzej Kałuża</li>
+                        </ul>
+                    </dd>
+                    <dt>Pakiet</dt>
+                    <dd>core</dd>
+                    <dt>Prywatne</dt>
+                    <dd>true</dd>
+                </dl>
+                <h4>Podsumowanie</h4>
+                <p>Get crontab content</p>
+                <h4>Zwraca</h4>
+                <dl>
+                    <dt>Typ danych</dt>
+                    <dd><code>character varying</code></dd>
+                </dl>
+            </section>
+            <section><a name="version"></a>
+                <h3>version <small>(function)</small></h3><code>version() <span>→ text</code>
+                <p>Funkcja zwraca wersję pakietu.</p>
+                <dl>
+                    <dt>Autor</dt>
+                    <dd>
+                        <ul>
+                            <li>Andrzej Kałuża</li>
+                        </ul>
+                    </dd>
+                    <dt>Dostępna od</dt>
+                    <dd>1.0.5</dd>
+                    <dt>Pakiet</dt>
+                    <dd>core</dd>
+                    <dt>Publiczne</dt>
+                    <dd>true</dd>
+                </dl>
+                <h4>Zmiany</h4>
+                <ul>
+                    <li>1.0.10 - obsługa poleceń administracyjnych, które nie są poleceniami harmonogramu CRON, np.
+                        MAILTO=adres</li>
+                    <li>1.0.11 - dodanie globalnego locka by dwie lub więcej funkcji nie mogły jednocześnie zmieniać
+                        cron-a systemowego</li>
+                    <li>1.0.12 - dodana została możliwość wstawiania do crona zadań z identyfikatorem zadania
+                        <code>cron.add('funckja($(jobid), ...)')</code>, <code>$(jobid)</code> zostanie zastąpiony
+                        numerem zadania</li>
+                    <li>1.1.14 - zmiana nazewnictwa funkcji, porządki z uprawnieniami</li>
+                </ul>
+                <h4>Zwraca</h4>
+                <p>wersja pakietu w formacie 'major.minor.release'</p>
+                <dl>
+                    <dt>Typ danych</dt>
+                    <dd><code>text</code></dd>
+                </dl>
+            </section>
+            <section><a name="_w_cron_id_seq"></a>
+                <h3>_w_cron_id_seq <small>(function)</small></h3><code>_w_cron_id_seq(adata) <span>→ void</code>
+                <p>Create/write unique id for all PostgreSQL instances</p>
+                <h4>Argumenty</h4>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Lp</th>
+                            <th>Nazwa</th>
+                            <th>Typ danych</th>
+                            <th>Wartość domyślna</th>
+                            <th>Tryb</th>
+                            <th>Opis</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>1</td>
+                            <td>adata</td>
+                            <td>text</td>
+                            <td></td>
+                            <td>in</td>
+                            <td></td>
+                        </tr>
+                    </tbody>
+                </table>
+                <dl>
+                    <dt>Autor</dt>
+                    <dd>
+                        <ul>
+                            <li>Andrzej Kałuża</li>
+                        </ul>
+                    </dd>
+                    <dt>Pakiet</dt>
+                    <dd>core</dd>
+                    <dt>Prywatne</dt>
+                    <dd>true</dd>
+                </dl>
+                <h4>Podsumowanie</h4>
+                <p>Set unique id</p>
+            </section>
+        </section>
+        <section id="tables">
+            <h2>Tabele</h2>
+            <section><a name="ctrl"></a>
+                <h3>ctrl <small>(ordinary)</small></h3>
+                <p>Tablica ctrl zawiera wartości parametrów konfiguracji mechanizmu CRON po stronie bazy
+                    danych.<br />Takie jak użytkownik i hasło. Tabela ctrl jest dostępna tylko dla użytkownika CRON.</p>
+                <h4>Kolumny tabeli</h4>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Lp</th>
+                            <th>Nazwa</th>
+                            <th>Typ danych</th>
+                            <th>Wartość domyślna</th>
+                            <th>Null</th>
+                            <th>PK</th>
+                            <th>FK</th>
+                            <th>Opis</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>1</td>
+                            <td>name</td>
+                            <td>name</td>
+                            <td></td>
+                            <td>true</td>
+                            <td>true</td>
+                            <td>false</td>
+                            <td>Nazwa parametru</td>
+                        </tr>
+                        <tr>
+                            <td>2</td>
+                            <td>value</td>
+                            <td>text</td>
+                            <td></td>
+                            <td>false</td>
+                            <td>false</td>
+                            <td>false</td>
+                            <td>Wartość parametru</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <dl>
+                    <dt>Pakiet</dt>
+                    <dd>core</dd>
+                </dl>
+                <h4>Podsumowanie</h4>
+                <p>Parametry konfiguracji</p>
+            </section>
+            <section><a name="log"></a>
+                <h3>log <small>(ordinary)</small></h3>
+                <p>Tablica logująca zawiera informacje o czasie wykonania, godzinie rozpoczęcia oraz godzinie
+                    zakończenia, informacje czy zadanie zakończyło się sukcesem oraz jeśli zadanie zakończyło się
+                    wyjątkiem – jego treść.<br />Rekord do tablicy dodawany jest w chwili rozpoczęcia zadania. Gdy
+                    zadanie się zakończy uaktualniana jest tylko informacja o czasie jego zakończenia.</p>
+                <h4>Kolumny tabeli</h4>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Lp</th>
+                            <th>Nazwa</th>
+                            <th>Typ danych</th>
+                            <th>Wartość domyślna</th>
+                            <th>Null</th>
+                            <th>PK</th>
+                            <th>FK</th>
+                            <th>Opis</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>1</td>
+                            <td>ilog</td>
+                            <td>bigserial</td>
+                            <td>nextval('cron.log_ilog_seq'::regclass)</td>
+                            <td>true</td>
+                            <td>true</td>
+                            <td>false</td>
+                            <td>Identyfikator rekordu</td>
+                        </tr>
+                        <tr>
+                            <td>2</td>
+                            <td>start</td>
+                            <td>timestamp without time zone</td>
+                            <td></td>
+                            <td>false</td>
+                            <td>false</td>
+                            <td>false</td>
+                            <td>Data i godzina rozpoczęcia zadania</td>
+                        </tr>
+                        <tr>
+                            <td>3</td>
+                            <td>stop</td>
+                            <td>timestamp without time zone</td>
+                            <td></td>
+                            <td>false</td>
+                            <td>false</td>
+                            <td>false</td>
+                            <td>Data i godzina zakończenia zadania</td>
+                        </tr>
+                        <tr>
+                            <td>4</td>
+                            <td>minute</td>
+                            <td>character varying</td>
+                            <td></td>
+                            <td>false</td>
+                            <td>false</td>
+                            <td>false</td>
+                            <td>Wartość kolumny minute z crona</td>
+                        </tr>
+                        <tr>
+                            <td>5</td>
+                            <td>hour</td>
+                            <td>character varying</td>
+                            <td></td>
+                            <td>false</td>
+                            <td>false</td>
+                            <td>false</td>
+                            <td>Wartość kolumny hour z crona</td>
+                        </tr>
+                        <tr>
+                            <td>6</td>
+                            <td>dayofmonth</td>
+                            <td>character varying</td>
+                            <td></td>
+                            <td>false</td>
+                            <td>false</td>
+                            <td>false</td>
+                            <td>Wartość kolumny dayofmonth z crona</td>
+                        </tr>
+                        <tr>
+                            <td>7</td>
+                            <td>month</td>
+                            <td>character varying</td>
+                            <td></td>
+                            <td>false</td>
+                            <td>false</td>
+                            <td>false</td>
+                            <td>Wartość kolumny month z crona</td>
+                        </tr>
+                        <tr>
+                            <td>8</td>
+                            <td>dayofweek</td>
+                            <td>character varying</td>
+                            <td></td>
+                            <td>false</td>
+                            <td>false</td>
+                            <td>false</td>
+                            <td>Wartość kolumny dayofweek z crona</td>
+                        </tr>
+                        <tr>
+                            <td>9</td>
+                            <td>command</td>
+                            <td>text</td>
+                            <td></td>
+                            <td>false</td>
+                            <td>false</td>
+                            <td>false</td>
+                            <td>Wykonywana komenda SQL</td>
+                        </tr>
+                        <tr>
+                            <td>10</td>
+                            <td>jobid</td>
+                            <td>numeric</td>
+                            <td></td>
+                            <td>false</td>
+                            <td>false</td>
+                            <td>false</td>
+                            <td>Wartość parametru abrokenflag</td>
+                        </tr>
+                        <tr>
+                            <td>11</td>
+                            <td>success</td>
+                            <td>boolean</td>
+                            <td>true</td>
+                            <td>false</td>
+                            <td>false</td>
+                            <td>false</td>
+                            <td>Czy zadanie zakończyło się sukcesem</td>
+                        </tr>
+                        <tr>
+                            <td>12</td>
+                            <td>exception</td>
+                            <td>text</td>
+                            <td></td>
+                            <td>false</td>
+                            <td>false</td>
+                            <td>false</td>
+                            <td>Treść wyjątku jeśli nastąpi</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <dl>
+                    <dt>Pakiet</dt>
+                    <dd>core</dd>
+                </dl>
+                <h4>Podsumowanie</h4>
+                <p>Tabela z logiem</p>
+            </section>
+        </section>
+        <section id="views">
+            <h2>Widoki</h2>
+            <section><a name="_crontab_l"></a>
+                <h3>_crontab_l <small>(view)</small></h3>
+                <p>cron native line with id if exists</p>
+                <h4>Kolumny widoku</h4>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Lp</th>
+                            <th>Nazwa</th>
+                            <th>Typ danych</th>
+                            <th>Opis</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>1</td>
+                            <td>pg_line</td>
+                            <td>text</td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td>2</td>
+                            <td>line</td>
+                            <td>text</td>
+                            <td></td>
+                        </tr>
+                    </tbody>
+                </table>
+                <dl>
+                    <dt>Pakiet</dt>
+                    <dd>core</dd>
+                </dl>
+            </section>
+            <section><a name="pg_list"></a>
+                <h3>pg_list <small>(view)</small></h3>
+                <p>Lista aktualnych zadań CRON dla aktualnej bazy danych.
+                    <br />Superuser widzi zadania z wszystkich baz danych.
+                </p>
+                <h4>Kolumny widoku</h4>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Lp</th>
+                            <th>Nazwa</th>
+                            <th>Typ danych</th>
+                            <th>Opis</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>1</td>
+                            <td>jobid</td>
+                            <td>bigint</td>
+                            <td>Id zadania z sekwencji lokalnej lub globalnej.</td>
+                        </tr>
+                        <tr>
+                            <td>2</td>
+                            <td>database</td>
+                            <td>character varying</td>
+                            <td>Baza danych dla której utworzono zadanie.</td>
+                        </tr>
+                        <tr>
+                            <td>3</td>
+                            <td>role</td>
+                            <td>character varying</td>
+                            <td>Rola/Użytkownik w ramach której zadanie będzie wykonane.</td>
+                        </tr>
+                        <tr>
+                            <td>4</td>
+                            <td>minute</td>
+                            <td>character varying</td>
+                            <td>Minuta w której zadanie będzie wykonane.</td>
+                        </tr>
+                        <tr>
+                            <td>5</td>
+                            <td>hour</td>
+                            <td>character varying</td>
+                            <td>Godzina w której zadanie będzie wykonane.</td>
+                        </tr>
+                        <tr>
+                            <td>6</td>
+                            <td>dayofmonth</td>
+                            <td>character varying</td>
+                            <td>Dzień miesiąca w którym zadanie zostanie wykonane.</td>
+                        </tr>
+                        <tr>
+                            <td>7</td>
+                            <td>month</td>
+                            <td>character varying</td>
+                            <td>Miesiąc wykonania zadania.</td>
+                        </tr>
+                        <tr>
+                            <td>8</td>
+                            <td>dayofweek</td>
+                            <td>character varying</td>
+                            <td>Dzień tygodnia w którym zadanie będzie wykonane.</td>
+                        </tr>
+                        <tr>
+                            <td>9</td>
+                            <td>last_start</td>
+                            <td>timestamp without time zone</td>
+                            <td>Ostatnia data i godzina wykonania zadania (z tabeli log)</td>
+                        </tr>
+                        <tr>
+                            <td>10</td>
+                            <td>this_start</td>
+                            <td>timestamp without time zone</td>
+                            <td>Data i godzina w której rozpoczęto wykonanie tego zadania (z tabeli log)</td>
+                        </tr>
+                        <tr>
+                            <td>11</td>
+                            <td>total_time</td>
+                            <td>bigint</td>
+                            <td>Całkowity czas wykonania zadania (z tabeli log)</td>
+                        </tr>
+                        <tr>
+                            <td>12</td>
+                            <td>failures</td>
+                            <td>bigint</td>
+                            <td>Informacja o ilości wykonań zadania, które zakończyły sie błędem (z tabeli log).</td>
+                        </tr>
+                        <tr>
+                            <td>13</td>
+                            <td>times</td>
+                            <td>bigint</td>
+                            <td>Ilość wykonań zadania (z tabeli log)</td>
+                        </tr>
+                        <tr>
+                            <td>14</td>
+                            <td>command</td>
+                            <td>text</td>
+                            <td>Polecenie PostgreSQL, które zostanie wykonane.</td>
+                        </tr>
+                        <tr>
+                            <td>15</td>
+                            <td>active</td>
+                            <td>character varying</td>
+                            <td>Czy zadanie jest aktywne.</td>
+                        </tr>
+                        <tr>
+                            <td>16</td>
+                            <td>autoremove</td>
+                            <td>character varying</td>
+                            <td>Czy zadanie jest jednorazowe, zostanie automatycznie usunięte po wykonaniu.</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <dl>
+                    <dt>Pakiet</dt>
+                    <dd>core</dd>
+                </dl>
+                <h4>Podsumowanie</h4>
+                <p>Lista aktualnych zadań</p>
+            </section>
+        </section>
+    </section><small>GENDOC 2.0.0 - Andrzej Kałuża</small>
+</body>
+
+</html>
