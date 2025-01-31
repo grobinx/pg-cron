@@ -5,7 +5,7 @@
 -- Dumped from database version 15.10 (Debian 15.10-0+deb12u1)
 -- Dumped by pg_dump version 17.0
 
--- Started on 2025-01-31 17:19:59
+-- Started on 2025-01-31 20:37:52
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -100,7 +100,7 @@ $$;
 ALTER FUNCTION cron._catch_exception(aerrm text, ailog bigint) OWNER TO cron;
 
 --
--- TOC entry 381 (class 1255 OID 16972)
+-- TOC entry 380 (class 1255 OID 16972)
 -- Name: _create_cron_line(bigint, character varying, character varying, character varying, character varying, character varying, character varying, text); Type: FUNCTION; Schema: cron; Owner: cron
 --
 
@@ -275,7 +275,7 @@ $$;
 ALTER FUNCTION cron._list() OWNER TO cron;
 
 --
--- TOC entry 393 (class 1255 OID 16979)
+-- TOC entry 391 (class 1255 OID 16979)
 -- Name: _parse_cron_line(text); Type: FUNCTION; Schema: cron; Owner: cron
 --
 
@@ -339,7 +339,7 @@ $$;
 ALTER FUNCTION cron._parse_cron_line(aline text) OWNER TO cron;
 
 --
--- TOC entry 392 (class 1255 OID 16956)
+-- TOC entry 390 (class 1255 OID 16956)
 -- Name: _prepare_command(bigint, text, boolean, character varying); Type: FUNCTION; Schema: cron; Owner: cron
 --
 
@@ -390,7 +390,7 @@ $_$;
 ALTER FUNCTION cron._prepare_command(ajobid bigint, acommand text, aautoremove boolean, arole character varying) OWNER TO cron;
 
 --
--- TOC entry 288 (class 1255 OID 16526)
+-- TOC entry 284 (class 1255 OID 16526)
 -- Name: _r_cron_id_seq(); Type: FUNCTION; Schema: cron; Owner: postgres
 --
 
@@ -407,13 +407,12 @@ $_$;
 ALTER FUNCTION cron._r_cron_id_seq() OWNER TO postgres;
 
 --
--- TOC entry 3566 (class 0 OID 0)
--- Dependencies: 288
+-- TOC entry 3575 (class 0 OID 0)
+-- Dependencies: 284
 -- Name: FUNCTION _r_cron_id_seq(); Type: COMMENT; Schema: cron; Owner: postgres
 --
 
 COMMENT ON FUNCTION cron._r_cron_id_seq() IS 'Get unique id for all PostgreSQL instances
-
 @summary Get unique id
 @author Andrzej Kałuża
 @private
@@ -421,7 +420,7 @@ COMMENT ON FUNCTION cron._r_cron_id_seq() IS 'Get unique id for all PostgreSQL i
 
 
 --
--- TOC entry 284 (class 1255 OID 16527)
+-- TOC entry 288 (class 1255 OID 16527)
 -- Name: _run(text); Type: FUNCTION; Schema: cron; Owner: postgres
 --
 
@@ -438,13 +437,12 @@ $_X$;
 ALTER FUNCTION cron._run(acommand text) OWNER TO postgres;
 
 --
--- TOC entry 3568 (class 0 OID 0)
--- Dependencies: 284
+-- TOC entry 3577 (class 0 OID 0)
+-- Dependencies: 288
 -- Name: FUNCTION _run(acommand text); Type: COMMENT; Schema: cron; Owner: postgres
 --
 
 COMMENT ON FUNCTION cron._run(acommand text) IS 'Function for run command on system console
-
 @summary Run console command
 @author Andrzej Kałuża
 @private
@@ -452,7 +450,7 @@ COMMENT ON FUNCTION cron._run(acommand text) IS 'Function for run command on sys
 
 
 --
--- TOC entry 380 (class 1255 OID 16977)
+-- TOC entry 414 (class 1255 OID 16977)
 -- Name: _start(bigint); Type: FUNCTION; Schema: cron; Owner: cron
 --
 
@@ -520,7 +518,7 @@ $$;
 ALTER FUNCTION cron._stop(ailog bigint) OWNER TO cron;
 
 --
--- TOC entry 286 (class 1255 OID 16528)
+-- TOC entry 285 (class 1255 OID 16528)
 -- Name: _sys_crontab(text); Type: FUNCTION; Schema: cron; Owner: postgres
 --
 
@@ -540,14 +538,13 @@ $_X$;
 ALTER FUNCTION cron._sys_crontab(adata text) OWNER TO postgres;
 
 --
--- TOC entry 3570 (class 0 OID 0)
--- Dependencies: 286
+-- TOC entry 3581 (class 0 OID 0)
+-- Dependencies: 285
 -- Name: FUNCTION _sys_crontab(adata text); Type: COMMENT; Schema: cron; Owner: postgres
 --
 
 COMMENT ON FUNCTION cron._sys_crontab(adata text) IS '
 Core function to set system crontab content
-
 @summary Set crontab content
 @author Andrzej Kałuża
 @private
@@ -555,7 +552,7 @@ Core function to set system crontab content
 
 
 --
--- TOC entry 287 (class 1255 OID 16529)
+-- TOC entry 286 (class 1255 OID 16529)
 -- Name: _sys_crontab_l(); Type: FUNCTION; Schema: cron; Owner: postgres
 --
 
@@ -572,14 +569,13 @@ $_$;
 ALTER FUNCTION cron._sys_crontab_l() OWNER TO postgres;
 
 --
--- TOC entry 3572 (class 0 OID 0)
--- Dependencies: 287
+-- TOC entry 3583 (class 0 OID 0)
+-- Dependencies: 286
 -- Name: FUNCTION _sys_crontab_l(); Type: COMMENT; Schema: cron; Owner: postgres
 --
 
 COMMENT ON FUNCTION cron._sys_crontab_l() IS '
 Core function for get crontab content
-
 @summary Get crontab content
 @author Andrzej Kałuża
 @private
@@ -587,7 +583,7 @@ Core function for get crontab content
 
 
 --
--- TOC entry 285 (class 1255 OID 16530)
+-- TOC entry 287 (class 1255 OID 16530)
 -- Name: _w_cron_id_seq(text); Type: FUNCTION; Schema: cron; Owner: postgres
 --
 
@@ -603,14 +599,13 @@ $_X$;
 ALTER FUNCTION cron._w_cron_id_seq(adata text) OWNER TO postgres;
 
 --
--- TOC entry 3574 (class 0 OID 0)
--- Dependencies: 285
+-- TOC entry 3585 (class 0 OID 0)
+-- Dependencies: 287
 -- Name: FUNCTION _w_cron_id_seq(adata text); Type: COMMENT; Schema: cron; Owner: postgres
 --
 
 COMMENT ON FUNCTION cron._w_cron_id_seq(adata text) IS '
 Create/write unique id for all PostgreSQL instances
-
 @summary Set unique id
 @author Andrzej Kałuża
 @private
@@ -618,7 +613,7 @@ Create/write unique id for all PostgreSQL instances
 
 
 --
--- TOC entry 386 (class 1255 OID 16971)
+-- TOC entry 415 (class 1255 OID 16971)
 -- Name: active(integer, character varying); Type: FUNCTION; Schema: cron; Owner: cron
 --
 
@@ -627,11 +622,11 @@ CREATE FUNCTION cron.active(ajobid integer, aactive character varying) RETURNS i
     AS $$
 /**
  * Pozwala aktywować wybrane zadanie.
+ * 
+ * @summary Aktywacja zadania
  *
  * @param ajobid Identyfikator zadania
  * @param aactive Nowa wartość dla parametru active (Y/N)
- * 
- * @summary Aktywacja zadania
  * @author Andrzej Kałuża
  * @public
  * 
@@ -668,7 +663,7 @@ $$;
 ALTER FUNCTION cron.active(ajobid integer, aactive character varying) OWNER TO cron;
 
 --
--- TOC entry 387 (class 1255 OID 27456)
+-- TOC entry 385 (class 1255 OID 27456)
 -- Name: add(character varying, character varying, character varying, character varying, character varying, character varying, integer, character varying, boolean, character varying); Type: FUNCTION; Schema: cron; Owner: cron
 --
 
@@ -760,16 +755,7 @@ $$;
 ALTER FUNCTION cron.add(acommand character varying, aminute character varying, ahour character varying, adayofmonth character varying, amonth character varying, adayofweek character varying, ajobid integer, aactive character varying, aautoremove boolean, arole character varying) OWNER TO cron;
 
 --
--- TOC entry 3577 (class 0 OID 0)
--- Dependencies: 387
--- Name: FUNCTION add(acommand character varying, aminute character varying, ahour character varying, adayofmonth character varying, amonth character varying, adayofweek character varying, ajobid integer, aactive character varying, aautoremove boolean, arole character varying); Type: COMMENT; Schema: cron; Owner: cron
---
-
-COMMENT ON FUNCTION cron.add(acommand character varying, aminute character varying, ahour character varying, adayofmonth character varying, amonth character varying, adayofweek character varying, ajobid integer, aactive character varying, aautoremove boolean, arole character varying) IS 'Dodaje nowe zadanie do crona.';
-
-
---
--- TOC entry 395 (class 1255 OID 16970)
+-- TOC entry 393 (class 1255 OID 16970)
 -- Name: change(integer, text); Type: FUNCTION; Schema: cron; Owner: cron
 --
 
@@ -1171,7 +1157,7 @@ CREATE VIEW cron._crontab_l AS
 ALTER VIEW cron._crontab_l OWNER TO cron;
 
 --
--- TOC entry 3587 (class 0 OID 0)
+-- TOC entry 3597 (class 0 OID 0)
 -- Dependencies: 223
 -- Name: VIEW _crontab_l; Type: COMMENT; Schema: cron; Owner: cron
 --
@@ -1194,7 +1180,7 @@ CREATE TABLE cron.ctrl (
 ALTER TABLE cron.ctrl OWNER TO cron;
 
 --
--- TOC entry 3588 (class 0 OID 0)
+-- TOC entry 3598 (class 0 OID 0)
 -- Dependencies: 224
 -- Name: TABLE ctrl; Type: COMMENT; Schema: cron; Owner: cron
 --
@@ -1206,7 +1192,7 @@ Takie jak użytkownik i hasło. Tabela ctrl jest dostępna tylko dla użytkownik
 
 
 --
--- TOC entry 3589 (class 0 OID 0)
+-- TOC entry 3599 (class 0 OID 0)
 -- Dependencies: 224
 -- Name: COLUMN ctrl.name; Type: COMMENT; Schema: cron; Owner: cron
 --
@@ -1215,7 +1201,7 @@ COMMENT ON COLUMN cron.ctrl.name IS 'Nazwa parametru';
 
 
 --
--- TOC entry 3590 (class 0 OID 0)
+-- TOC entry 3600 (class 0 OID 0)
 -- Dependencies: 224
 -- Name: COLUMN ctrl.value; Type: COMMENT; Schema: cron; Owner: cron
 --
@@ -1262,7 +1248,7 @@ CREATE TABLE cron.log (
 ALTER TABLE cron.log OWNER TO cron;
 
 --
--- TOC entry 3592 (class 0 OID 0)
+-- TOC entry 3602 (class 0 OID 0)
 -- Dependencies: 226
 -- Name: TABLE log; Type: COMMENT; Schema: cron; Owner: cron
 --
@@ -1274,7 +1260,7 @@ Rekord do tablicy dodawany jest w chwili rozpoczęcia zadania. Gdy zadanie się 
 
 
 --
--- TOC entry 3593 (class 0 OID 0)
+-- TOC entry 3603 (class 0 OID 0)
 -- Dependencies: 226
 -- Name: COLUMN log.ilog; Type: COMMENT; Schema: cron; Owner: cron
 --
@@ -1283,7 +1269,7 @@ COMMENT ON COLUMN cron.log.ilog IS 'Identyfikator rekordu';
 
 
 --
--- TOC entry 3594 (class 0 OID 0)
+-- TOC entry 3604 (class 0 OID 0)
 -- Dependencies: 226
 -- Name: COLUMN log.start; Type: COMMENT; Schema: cron; Owner: cron
 --
@@ -1292,7 +1278,7 @@ COMMENT ON COLUMN cron.log.start IS 'Data i godzina rozpoczęcia zadania';
 
 
 --
--- TOC entry 3595 (class 0 OID 0)
+-- TOC entry 3605 (class 0 OID 0)
 -- Dependencies: 226
 -- Name: COLUMN log.stop; Type: COMMENT; Schema: cron; Owner: cron
 --
@@ -1301,7 +1287,7 @@ COMMENT ON COLUMN cron.log.stop IS 'Data i godzina zakończenia zadania';
 
 
 --
--- TOC entry 3596 (class 0 OID 0)
+-- TOC entry 3606 (class 0 OID 0)
 -- Dependencies: 226
 -- Name: COLUMN log.minute; Type: COMMENT; Schema: cron; Owner: cron
 --
@@ -1310,7 +1296,7 @@ COMMENT ON COLUMN cron.log.minute IS 'Wartość kolumny minute z crona';
 
 
 --
--- TOC entry 3597 (class 0 OID 0)
+-- TOC entry 3607 (class 0 OID 0)
 -- Dependencies: 226
 -- Name: COLUMN log.hour; Type: COMMENT; Schema: cron; Owner: cron
 --
@@ -1319,7 +1305,7 @@ COMMENT ON COLUMN cron.log.hour IS 'Wartość kolumny hour z crona';
 
 
 --
--- TOC entry 3598 (class 0 OID 0)
+-- TOC entry 3608 (class 0 OID 0)
 -- Dependencies: 226
 -- Name: COLUMN log.dayofmonth; Type: COMMENT; Schema: cron; Owner: cron
 --
@@ -1328,7 +1314,7 @@ COMMENT ON COLUMN cron.log.dayofmonth IS 'Wartość kolumny dayofmonth z crona';
 
 
 --
--- TOC entry 3599 (class 0 OID 0)
+-- TOC entry 3609 (class 0 OID 0)
 -- Dependencies: 226
 -- Name: COLUMN log.month; Type: COMMENT; Schema: cron; Owner: cron
 --
@@ -1337,7 +1323,7 @@ COMMENT ON COLUMN cron.log.month IS 'Wartość kolumny month z crona';
 
 
 --
--- TOC entry 3600 (class 0 OID 0)
+-- TOC entry 3610 (class 0 OID 0)
 -- Dependencies: 226
 -- Name: COLUMN log.dayofweek; Type: COMMENT; Schema: cron; Owner: cron
 --
@@ -1346,7 +1332,7 @@ COMMENT ON COLUMN cron.log.dayofweek IS 'Wartość kolumny dayofweek z crona';
 
 
 --
--- TOC entry 3601 (class 0 OID 0)
+-- TOC entry 3611 (class 0 OID 0)
 -- Dependencies: 226
 -- Name: COLUMN log.command; Type: COMMENT; Schema: cron; Owner: cron
 --
@@ -1355,7 +1341,7 @@ COMMENT ON COLUMN cron.log.command IS 'Wykonywana komenda SQL';
 
 
 --
--- TOC entry 3602 (class 0 OID 0)
+-- TOC entry 3612 (class 0 OID 0)
 -- Dependencies: 226
 -- Name: COLUMN log.jobid; Type: COMMENT; Schema: cron; Owner: cron
 --
@@ -1364,7 +1350,7 @@ COMMENT ON COLUMN cron.log.jobid IS 'Wartość parametru abrokenflag';
 
 
 --
--- TOC entry 3603 (class 0 OID 0)
+-- TOC entry 3613 (class 0 OID 0)
 -- Dependencies: 226
 -- Name: COLUMN log.success; Type: COMMENT; Schema: cron; Owner: cron
 --
@@ -1373,7 +1359,7 @@ COMMENT ON COLUMN cron.log.success IS 'Czy zadanie zakończyło się sukcesem';
 
 
 --
--- TOC entry 3604 (class 0 OID 0)
+-- TOC entry 3614 (class 0 OID 0)
 -- Dependencies: 226
 -- Name: COLUMN log.exception; Type: COMMENT; Schema: cron; Owner: cron
 --
@@ -1397,7 +1383,7 @@ CREATE SEQUENCE cron.log_ilog_seq
 ALTER SEQUENCE cron.log_ilog_seq OWNER TO cron;
 
 --
--- TOC entry 3606 (class 0 OID 0)
+-- TOC entry 3616 (class 0 OID 0)
 -- Dependencies: 227
 -- Name: log_ilog_seq; Type: SEQUENCE OWNED BY; Schema: cron; Owner: cron
 --
@@ -1406,7 +1392,7 @@ ALTER SEQUENCE cron.log_ilog_seq OWNED BY cron.log.ilog;
 
 
 --
--- TOC entry 228 (class 1259 OID 16579)
+-- TOC entry 231 (class 1259 OID 27675)
 -- Name: pg_list; Type: VIEW; Schema: cron; Owner: cron
 --
 
@@ -1433,8 +1419,8 @@ CREATE VIEW cron.pg_list AS
 ALTER VIEW cron.pg_list OWNER TO cron;
 
 --
--- TOC entry 3608 (class 0 OID 0)
--- Dependencies: 228
+-- TOC entry 3618 (class 0 OID 0)
+-- Dependencies: 231
 -- Name: VIEW pg_list; Type: COMMENT; Schema: cron; Owner: cron
 --
 
@@ -1445,8 +1431,8 @@ Superuser widzi zadania z wszystkich baz danych.
 
 
 --
--- TOC entry 3609 (class 0 OID 0)
--- Dependencies: 228
+-- TOC entry 3619 (class 0 OID 0)
+-- Dependencies: 231
 -- Name: COLUMN pg_list.jobid; Type: COMMENT; Schema: cron; Owner: cron
 --
 
@@ -1454,8 +1440,8 @@ COMMENT ON COLUMN cron.pg_list.jobid IS 'Id zadania z sekwencji lokalnej lub glo
 
 
 --
--- TOC entry 3610 (class 0 OID 0)
--- Dependencies: 228
+-- TOC entry 3620 (class 0 OID 0)
+-- Dependencies: 231
 -- Name: COLUMN pg_list.database; Type: COMMENT; Schema: cron; Owner: cron
 --
 
@@ -1463,8 +1449,8 @@ COMMENT ON COLUMN cron.pg_list.database IS 'Baza danych dla której utworzono za
 
 
 --
--- TOC entry 3611 (class 0 OID 0)
--- Dependencies: 228
+-- TOC entry 3621 (class 0 OID 0)
+-- Dependencies: 231
 -- Name: COLUMN pg_list.role; Type: COMMENT; Schema: cron; Owner: cron
 --
 
@@ -1472,8 +1458,8 @@ COMMENT ON COLUMN cron.pg_list.role IS 'Rola/Użytkownik w ramach której zadani
 
 
 --
--- TOC entry 3612 (class 0 OID 0)
--- Dependencies: 228
+-- TOC entry 3622 (class 0 OID 0)
+-- Dependencies: 231
 -- Name: COLUMN pg_list.minute; Type: COMMENT; Schema: cron; Owner: cron
 --
 
@@ -1481,8 +1467,8 @@ COMMENT ON COLUMN cron.pg_list.minute IS 'Minuta w której zadanie będzie wykon
 
 
 --
--- TOC entry 3613 (class 0 OID 0)
--- Dependencies: 228
+-- TOC entry 3623 (class 0 OID 0)
+-- Dependencies: 231
 -- Name: COLUMN pg_list.hour; Type: COMMENT; Schema: cron; Owner: cron
 --
 
@@ -1490,8 +1476,8 @@ COMMENT ON COLUMN cron.pg_list.hour IS 'Godzina w której zadanie będzie wykona
 
 
 --
--- TOC entry 3614 (class 0 OID 0)
--- Dependencies: 228
+-- TOC entry 3624 (class 0 OID 0)
+-- Dependencies: 231
 -- Name: COLUMN pg_list.dayofmonth; Type: COMMENT; Schema: cron; Owner: cron
 --
 
@@ -1499,8 +1485,8 @@ COMMENT ON COLUMN cron.pg_list.dayofmonth IS 'Dzień miesiąca w którym zadanie
 
 
 --
--- TOC entry 3615 (class 0 OID 0)
--- Dependencies: 228
+-- TOC entry 3625 (class 0 OID 0)
+-- Dependencies: 231
 -- Name: COLUMN pg_list.month; Type: COMMENT; Schema: cron; Owner: cron
 --
 
@@ -1508,8 +1494,8 @@ COMMENT ON COLUMN cron.pg_list.month IS 'Miesiąc wykonania zadania.';
 
 
 --
--- TOC entry 3616 (class 0 OID 0)
--- Dependencies: 228
+-- TOC entry 3626 (class 0 OID 0)
+-- Dependencies: 231
 -- Name: COLUMN pg_list.dayofweek; Type: COMMENT; Schema: cron; Owner: cron
 --
 
@@ -1517,8 +1503,8 @@ COMMENT ON COLUMN cron.pg_list.dayofweek IS 'Dzień tygodnia w którym zadanie b
 
 
 --
--- TOC entry 3617 (class 0 OID 0)
--- Dependencies: 228
+-- TOC entry 3627 (class 0 OID 0)
+-- Dependencies: 231
 -- Name: COLUMN pg_list.last_start; Type: COMMENT; Schema: cron; Owner: cron
 --
 
@@ -1526,8 +1512,8 @@ COMMENT ON COLUMN cron.pg_list.last_start IS 'Ostatnia data i godzina wykonania 
 
 
 --
--- TOC entry 3618 (class 0 OID 0)
--- Dependencies: 228
+-- TOC entry 3628 (class 0 OID 0)
+-- Dependencies: 231
 -- Name: COLUMN pg_list.this_start; Type: COMMENT; Schema: cron; Owner: cron
 --
 
@@ -1535,8 +1521,8 @@ COMMENT ON COLUMN cron.pg_list.this_start IS 'Data i godzina w której rozpoczę
 
 
 --
--- TOC entry 3619 (class 0 OID 0)
--- Dependencies: 228
+-- TOC entry 3629 (class 0 OID 0)
+-- Dependencies: 231
 -- Name: COLUMN pg_list.total_time; Type: COMMENT; Schema: cron; Owner: cron
 --
 
@@ -1544,8 +1530,8 @@ COMMENT ON COLUMN cron.pg_list.total_time IS 'Całkowity czas wykonania zadania 
 
 
 --
--- TOC entry 3620 (class 0 OID 0)
--- Dependencies: 228
+-- TOC entry 3630 (class 0 OID 0)
+-- Dependencies: 231
 -- Name: COLUMN pg_list.failures; Type: COMMENT; Schema: cron; Owner: cron
 --
 
@@ -1553,8 +1539,8 @@ COMMENT ON COLUMN cron.pg_list.failures IS 'Informacja o ilości wykonań zadani
 
 
 --
--- TOC entry 3621 (class 0 OID 0)
--- Dependencies: 228
+-- TOC entry 3631 (class 0 OID 0)
+-- Dependencies: 231
 -- Name: COLUMN pg_list.times; Type: COMMENT; Schema: cron; Owner: cron
 --
 
@@ -1562,8 +1548,8 @@ COMMENT ON COLUMN cron.pg_list.times IS 'Ilość wykonań zadania (z tabeli log)
 
 
 --
--- TOC entry 3622 (class 0 OID 0)
--- Dependencies: 228
+-- TOC entry 3632 (class 0 OID 0)
+-- Dependencies: 231
 -- Name: COLUMN pg_list.command; Type: COMMENT; Schema: cron; Owner: cron
 --
 
@@ -1571,8 +1557,8 @@ COMMENT ON COLUMN cron.pg_list.command IS 'Polecenie PostgreSQL, które zostanie
 
 
 --
--- TOC entry 3623 (class 0 OID 0)
--- Dependencies: 228
+-- TOC entry 3633 (class 0 OID 0)
+-- Dependencies: 231
 -- Name: COLUMN pg_list.active; Type: COMMENT; Schema: cron; Owner: cron
 --
 
@@ -1580,8 +1566,8 @@ COMMENT ON COLUMN cron.pg_list.active IS 'Czy zadanie jest aktywne.';
 
 
 --
--- TOC entry 3624 (class 0 OID 0)
--- Dependencies: 228
+-- TOC entry 3634 (class 0 OID 0)
+-- Dependencies: 231
 -- Name: COLUMN pg_list.autoremove; Type: COMMENT; Schema: cron; Owner: cron
 --
 
@@ -1609,7 +1595,7 @@ password	cron
 
 
 --
--- TOC entry 3625 (class 0 OID 0)
+-- TOC entry 3636 (class 0 OID 0)
 -- Dependencies: 225
 -- Name: job_seq; Type: SEQUENCE SET; Schema: cron; Owner: cron
 --
@@ -1655,18 +1641,100 @@ GRANT USAGE ON SCHEMA cron TO gendoc_role;
 
 
 --
--- TOC entry 3567 (class 0 OID 0)
--- Dependencies: 288
--- Name: FUNCTION _r_cron_id_seq(); Type: ACL; Schema: cron; Owner: postgres
+-- TOC entry 3566 (class 0 OID 0)
+-- Dependencies: 311
+-- Name: FUNCTION _catch_exception(aerrm text, ailog bigint); Type: ACL; Schema: cron; Owner: cron
 --
 
-REVOKE ALL ON FUNCTION cron._r_cron_id_seq() FROM PUBLIC;
-GRANT ALL ON FUNCTION cron._r_cron_id_seq() TO cron;
+REVOKE ALL ON FUNCTION cron._catch_exception(aerrm text, ailog bigint) FROM PUBLIC;
+
+
+--
+-- TOC entry 3567 (class 0 OID 0)
+-- Dependencies: 380
+-- Name: FUNCTION _create_cron_line(apgjobid bigint, aactive character varying, aminute character varying, ahour character varying, adayofmonth character varying, amonth character varying, adayofweek character varying, acommand text); Type: ACL; Schema: cron; Owner: cron
+--
+
+REVOKE ALL ON FUNCTION cron._create_cron_line(apgjobid bigint, aactive character varying, aminute character varying, ahour character varying, adayofmonth character varying, amonth character varying, adayofweek character varying, acommand text) FROM PUBLIC;
+
+
+--
+-- TOC entry 3568 (class 0 OID 0)
+-- Dependencies: 320
+-- Name: FUNCTION _get_ctrl(aname name, adefaultvalue text); Type: ACL; Schema: cron; Owner: cron
+--
+
+REVOKE ALL ON FUNCTION cron._get_ctrl(aname name, adefaultvalue text) FROM PUBLIC;
 
 
 --
 -- TOC entry 3569 (class 0 OID 0)
+-- Dependencies: 321
+-- Name: FUNCTION _get_psql_opt(aopt integer, acommand text); Type: ACL; Schema: cron; Owner: cron
+--
+
+REVOKE ALL ON FUNCTION cron._get_psql_opt(aopt integer, acommand text) FROM PUBLIC;
+
+
+--
+-- TOC entry 3570 (class 0 OID 0)
+-- Dependencies: 319
+-- Name: FUNCTION _get_psql_opt(aopt text, acommand text); Type: ACL; Schema: cron; Owner: cron
+--
+
+REVOKE ALL ON FUNCTION cron._get_psql_opt(aopt text, acommand text) FROM PUBLIC;
+
+
+--
+-- TOC entry 3571 (class 0 OID 0)
+-- Dependencies: 317
+-- Name: FUNCTION _keylock(); Type: ACL; Schema: cron; Owner: cron
+--
+
+REVOKE ALL ON FUNCTION cron._keylock() FROM PUBLIC;
+
+
+--
+-- TOC entry 3572 (class 0 OID 0)
+-- Dependencies: 322
+-- Name: FUNCTION _list(); Type: ACL; Schema: cron; Owner: cron
+--
+
+REVOKE ALL ON FUNCTION cron._list() FROM PUBLIC;
+
+
+--
+-- TOC entry 3573 (class 0 OID 0)
+-- Dependencies: 391
+-- Name: FUNCTION _parse_cron_line(aline text); Type: ACL; Schema: cron; Owner: cron
+--
+
+REVOKE ALL ON FUNCTION cron._parse_cron_line(aline text) FROM PUBLIC;
+
+
+--
+-- TOC entry 3574 (class 0 OID 0)
+-- Dependencies: 390
+-- Name: FUNCTION _prepare_command(ajobid bigint, acommand text, aautoremove boolean, arole character varying); Type: ACL; Schema: cron; Owner: cron
+--
+
+REVOKE ALL ON FUNCTION cron._prepare_command(ajobid bigint, acommand text, aautoremove boolean, arole character varying) FROM PUBLIC;
+
+
+--
+-- TOC entry 3576 (class 0 OID 0)
 -- Dependencies: 284
+-- Name: FUNCTION _r_cron_id_seq(); Type: ACL; Schema: cron; Owner: postgres
+--
+
+REVOKE ALL ON FUNCTION cron._r_cron_id_seq() FROM PUBLIC;
+REVOKE ALL ON FUNCTION cron._r_cron_id_seq() FROM postgres;
+GRANT ALL ON FUNCTION cron._r_cron_id_seq() TO cron;
+
+
+--
+-- TOC entry 3578 (class 0 OID 0)
+-- Dependencies: 288
 -- Name: FUNCTION _run(acommand text); Type: ACL; Schema: cron; Owner: postgres
 --
 
@@ -1675,8 +1743,26 @@ GRANT ALL ON FUNCTION cron._run(acommand text) TO cron;
 
 
 --
--- TOC entry 3571 (class 0 OID 0)
--- Dependencies: 286
+-- TOC entry 3579 (class 0 OID 0)
+-- Dependencies: 414
+-- Name: FUNCTION _start(ajobid bigint); Type: ACL; Schema: cron; Owner: cron
+--
+
+REVOKE ALL ON FUNCTION cron._start(ajobid bigint) FROM PUBLIC;
+
+
+--
+-- TOC entry 3580 (class 0 OID 0)
+-- Dependencies: 318
+-- Name: FUNCTION _stop(ailog bigint); Type: ACL; Schema: cron; Owner: cron
+--
+
+REVOKE ALL ON FUNCTION cron._stop(ailog bigint) FROM PUBLIC;
+
+
+--
+-- TOC entry 3582 (class 0 OID 0)
+-- Dependencies: 285
 -- Name: FUNCTION _sys_crontab(adata text); Type: ACL; Schema: cron; Owner: postgres
 --
 
@@ -1685,8 +1771,8 @@ GRANT ALL ON FUNCTION cron._sys_crontab(adata text) TO cron;
 
 
 --
--- TOC entry 3573 (class 0 OID 0)
--- Dependencies: 287
+-- TOC entry 3584 (class 0 OID 0)
+-- Dependencies: 286
 -- Name: FUNCTION _sys_crontab_l(); Type: ACL; Schema: cron; Owner: postgres
 --
 
@@ -1695,8 +1781,8 @@ GRANT ALL ON FUNCTION cron._sys_crontab_l() TO cron;
 
 
 --
--- TOC entry 3575 (class 0 OID 0)
--- Dependencies: 285
+-- TOC entry 3586 (class 0 OID 0)
+-- Dependencies: 287
 -- Name: FUNCTION _w_cron_id_seq(adata text); Type: ACL; Schema: cron; Owner: postgres
 --
 
@@ -1705,8 +1791,8 @@ GRANT ALL ON FUNCTION cron._w_cron_id_seq(adata text) TO cron;
 
 
 --
--- TOC entry 3576 (class 0 OID 0)
--- Dependencies: 386
+-- TOC entry 3587 (class 0 OID 0)
+-- Dependencies: 415
 -- Name: FUNCTION active(ajobid integer, aactive character varying); Type: ACL; Schema: cron; Owner: cron
 --
 
@@ -1715,8 +1801,8 @@ GRANT ALL ON FUNCTION cron.active(ajobid integer, aactive character varying) TO 
 
 
 --
--- TOC entry 3578 (class 0 OID 0)
--- Dependencies: 387
+-- TOC entry 3588 (class 0 OID 0)
+-- Dependencies: 385
 -- Name: FUNCTION add(acommand character varying, aminute character varying, ahour character varying, adayofmonth character varying, amonth character varying, adayofweek character varying, ajobid integer, aactive character varying, aautoremove boolean, arole character varying); Type: ACL; Schema: cron; Owner: cron
 --
 
@@ -1725,8 +1811,8 @@ GRANT ALL ON FUNCTION cron.add(acommand character varying, aminute character var
 
 
 --
--- TOC entry 3579 (class 0 OID 0)
--- Dependencies: 395
+-- TOC entry 3589 (class 0 OID 0)
+-- Dependencies: 393
 -- Name: FUNCTION change(ajobid integer, acommand text); Type: ACL; Schema: cron; Owner: cron
 --
 
@@ -1735,7 +1821,7 @@ GRANT ALL ON FUNCTION cron.change(ajobid integer, acommand text) TO cron_role;
 
 
 --
--- TOC entry 3580 (class 0 OID 0)
+-- TOC entry 3590 (class 0 OID 0)
 -- Dependencies: 295
 -- Name: FUNCTION clear_log(); Type: ACL; Schema: cron; Owner: cron
 --
@@ -1745,7 +1831,7 @@ GRANT ALL ON FUNCTION cron.clear_log() TO cron_role;
 
 
 --
--- TOC entry 3581 (class 0 OID 0)
+-- TOC entry 3591 (class 0 OID 0)
 -- Dependencies: 379
 -- Name: FUNCTION frequence(ajobid integer, aminute character varying, ahour character varying, adayofmonth character varying, amonth character varying, adayofweek character varying); Type: ACL; Schema: cron; Owner: cron
 --
@@ -1755,7 +1841,7 @@ GRANT ALL ON FUNCTION cron.frequence(ajobid integer, aminute character varying, 
 
 
 --
--- TOC entry 3582 (class 0 OID 0)
+-- TOC entry 3592 (class 0 OID 0)
 -- Dependencies: 296
 -- Name: FUNCTION isexists(ajobid integer); Type: ACL; Schema: cron; Owner: cron
 --
@@ -1765,7 +1851,7 @@ GRANT ALL ON FUNCTION cron.isexists(ajobid integer) TO cron_role;
 
 
 --
--- TOC entry 3583 (class 0 OID 0)
+-- TOC entry 3593 (class 0 OID 0)
 -- Dependencies: 297
 -- Name: FUNCTION pg_list(); Type: ACL; Schema: cron; Owner: cron
 --
@@ -1775,7 +1861,7 @@ GRANT ALL ON FUNCTION cron.pg_list() TO cron_role;
 
 
 --
--- TOC entry 3584 (class 0 OID 0)
+-- TOC entry 3594 (class 0 OID 0)
 -- Dependencies: 323
 -- Name: FUNCTION remove(ajobid integer); Type: ACL; Schema: cron; Owner: cron
 --
@@ -1785,7 +1871,7 @@ GRANT ALL ON FUNCTION cron.remove(ajobid integer) TO cron_role;
 
 
 --
--- TOC entry 3585 (class 0 OID 0)
+-- TOC entry 3595 (class 0 OID 0)
 -- Dependencies: 298
 -- Name: FUNCTION run(ajobid integer); Type: ACL; Schema: cron; Owner: cron
 --
@@ -1795,7 +1881,7 @@ GRANT ALL ON FUNCTION cron.run(ajobid integer) TO cron_role;
 
 
 --
--- TOC entry 3586 (class 0 OID 0)
+-- TOC entry 3596 (class 0 OID 0)
 -- Dependencies: 290
 -- Name: FUNCTION run(acommand character varying, arole character varying); Type: ACL; Schema: cron; Owner: cron
 --
@@ -1805,7 +1891,7 @@ GRANT ALL ON FUNCTION cron.run(acommand character varying, arole character varyi
 
 
 --
--- TOC entry 3591 (class 0 OID 0)
+-- TOC entry 3601 (class 0 OID 0)
 -- Dependencies: 225
 -- Name: SEQUENCE job_seq; Type: ACL; Schema: cron; Owner: cron
 --
@@ -1814,7 +1900,7 @@ GRANT ALL ON SEQUENCE cron.job_seq TO cron_role;
 
 
 --
--- TOC entry 3605 (class 0 OID 0)
+-- TOC entry 3615 (class 0 OID 0)
 -- Dependencies: 226
 -- Name: TABLE log; Type: ACL; Schema: cron; Owner: cron
 --
@@ -1823,7 +1909,7 @@ GRANT SELECT ON TABLE cron.log TO cron_role;
 
 
 --
--- TOC entry 3607 (class 0 OID 0)
+-- TOC entry 3617 (class 0 OID 0)
 -- Dependencies: 227
 -- Name: SEQUENCE log_ilog_seq; Type: ACL; Schema: cron; Owner: cron
 --
@@ -1831,7 +1917,16 @@ GRANT SELECT ON TABLE cron.log TO cron_role;
 GRANT SELECT ON SEQUENCE cron.log_ilog_seq TO cron_role;
 
 
--- Completed on 2025-01-31 17:20:03
+--
+-- TOC entry 3635 (class 0 OID 0)
+-- Dependencies: 231
+-- Name: TABLE pg_list; Type: ACL; Schema: cron; Owner: cron
+--
+
+GRANT SELECT ON TABLE cron.pg_list TO cron_role;
+
+
+-- Completed on 2025-01-31 20:37:56
 
 --
 -- PostgreSQL database dump complete
