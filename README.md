@@ -25,7 +25,7 @@ With the `psql` program provided with the PostgreSQL database run the `dist/cron
 
 The mechanism must be able to execute user tasks. This can be done in two ways:
 1. Users add tasks within the CRON role (see the add function, arole parameter). CRON must then have the rights to execute the user function, and the function itself within the CRON user must have access to its tables. This can be done by setting the function being executed as `SECURITY DEFINER`
-2. Users add tasks within their user. You must then ensure that the mechanism can switch to it by issuing the `GRANT CRON TO USER` command. Then the user function will be executed within its rights.
+2. Users add tasks within their user. You must then ensure that the mechanism can switch to it by issuing the `GRANT USER TO CRON` command. Then the user function will be executed within its rights.
 
 Previously created CRON tasks will be safe. You will still be able to edit them from the console and they will not be visible to users. Tasks inserted from the database level are specially marked in CRON.
 
